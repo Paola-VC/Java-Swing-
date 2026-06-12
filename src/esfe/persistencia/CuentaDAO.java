@@ -30,84 +30,175 @@ public class CuentaDAO {
     }
 
     public boolean depositar(String numeroCuenta, double monto) {
-        String sql = "UPDATE Cuentas SET Saldo = Saldo + ? WHERE NumeroCuenta = ? AND Estado = 1";
+        if (monto <= 0) {
+            return false;
+        }
 
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        Connection connection = null;
 
-            statement.setDouble(1, monto);
-            statement.setString(2, numeroCuenta);
+        try {
+            connection = ConnectionManager.getConnection();
+            connection.setAutoCommit(false);
 
-            int filasAfectadas = statement.executeUpdate();
+            Integer idCuenta = obtenerIdCuenta(connection, numeroCuenta);
 
-            if (filasAfectadas > 0) {
-                registrarMovimiento(numeroCuenta, "Deposito", monto);
-                return true;
+            if (idCuenta == null) {
+                connection.rollback();
+                return false;
             }
+
+            String sqlActualizar = "UPDATE Cuentas SET Saldo = Saldo + ? WHERE NumeroCuenta = ? AND Estado = 1";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlActualizar)) {
+                statement.setDouble(1, monto);
+                statement.setString(2, numeroCuenta);
+
+                int filasAfectadas = statement.executeUpdate();
+
+                if (filasAfectadas <= 0) {
+                    connection.rollback();
+                    return false;
+                }
+            }
+
+            registrarMovimiento(connection, idCuenta, "Deposito", monto);
+
+            connection.commit();
+            return true;
 
         } catch (SQLException e) {
             System.out.println("Error al depositar:");
             e.printStackTrace();
-        }
 
-        return false;
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+
+            return false;
+
+        } finally {
+            cerrarConexion(connection);
+        }
     }
 
     public boolean retirar(String numeroCuenta, double monto) {
-        double saldoActual = obtenerSaldo(numeroCuenta);
-
-        if (monto > saldoActual) {
+        if (monto <= 0) {
             return false;
         }
 
-        String sql = "UPDATE Cuentas SET Saldo = Saldo - ? WHERE NumeroCuenta = ? AND Estado = 1";
+        Connection connection = null;
 
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+        try {
+            connection = ConnectionManager.getConnection();
+            connection.setAutoCommit(false);
 
-            statement.setDouble(1, monto);
-            statement.setString(2, numeroCuenta);
+            Integer idCuenta = obtenerIdCuenta(connection, numeroCuenta);
 
-            int filasAfectadas = statement.executeUpdate();
-
-            if (filasAfectadas > 0) {
-                registrarMovimiento(numeroCuenta, "Retiro", monto);
-                return true;
+            if (idCuenta == null) {
+                connection.rollback();
+                return false;
             }
+
+            double saldoActual = obtenerSaldo(connection, numeroCuenta);
+
+            if (monto > saldoActual) {
+                connection.rollback();
+                return false;
+            }
+
+            String sqlActualizar = "UPDATE Cuentas SET Saldo = Saldo - ? WHERE NumeroCuenta = ? AND Estado = 1";
+
+            try (PreparedStatement statement = connection.prepareStatement(sqlActualizar)) {
+                statement.setDouble(1, monto);
+                statement.setString(2, numeroCuenta);
+
+                int filasAfectadas = statement.executeUpdate();
+
+                if (filasAfectadas <= 0) {
+                    connection.rollback();
+                    return false;
+                }
+            }
+
+            registrarMovimiento(connection, idCuenta, "Retiro", monto);
+
+            connection.commit();
+            return true;
 
         } catch (SQLException e) {
             System.out.println("Error al retirar:");
             e.printStackTrace();
-        }
 
-        return false;
-    }
-
-    private void registrarMovimiento(String numeroCuenta, String tipoMovimiento, double monto) {
-        String sqlIdCuenta = "SELECT IdCuenta FROM Cuentas WHERE NumeroCuenta = ?";
-        String sqlMovimiento = "INSERT INTO Movimientos (IdCuenta, TipoMovimiento, Monto) VALUES (?, ?, ?)";
-
-        try (Connection connection = ConnectionManager.getConnection();
-             PreparedStatement statementCuenta = connection.prepareStatement(sqlIdCuenta)) {
-
-            statementCuenta.setString(1, numeroCuenta);
-
-            ResultSet resultSet = statementCuenta.executeQuery();
-
-            if (resultSet.next()) {
-                int idCuenta = resultSet.getInt("IdCuenta");
-
-                try (PreparedStatement statementMovimiento = connection.prepareStatement(sqlMovimiento)) {
-                    statementMovimiento.setInt(1, idCuenta);
-                    statementMovimiento.setString(2, tipoMovimiento);
-                    statementMovimiento.setDouble(3, monto);
-                    statementMovimiento.executeUpdate();
+            if (connection != null) {
+                try {
+                    connection.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
             }
 
-        } catch (SQLException e) {
-            System.out.println("Error al registrar movimiento:");
-            e.printStackTrace();
+            return false;
+
+        } finally {
+            cerrarConexion(connection);
+        }
+    }
+
+    private Integer obtenerIdCuenta(Connection connection, String numeroCuenta) throws SQLException {
+        String sql = "SELECT IdCuenta FROM Cuentas WHERE NumeroCuenta = ? AND Estado = 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, numeroCuenta);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getInt("IdCuenta");
+            }
+        }
+
+        return null;
+    }
+
+    private double obtenerSaldo(Connection connection, String numeroCuenta) throws SQLException {
+        String sql = "SELECT Saldo FROM Cuentas WHERE NumeroCuenta = ? AND Estado = 1";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, numeroCuenta);
+
+            ResultSet resultSet = statement.executeQuery();
+
+            if (resultSet.next()) {
+                return resultSet.getDouble("Saldo");
+            }
+        }
+
+        return 0;
+    }
+
+    private void registrarMovimiento(Connection connection, int idCuenta, String tipoMovimiento, double monto) throws SQLException {
+        String sql = "INSERT INTO Movimientos (IdCuenta, TipoMovimiento, Monto) VALUES (?, ?, ?)";
+
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setInt(1, idCuenta);
+            statement.setString(2, tipoMovimiento);
+            statement.setDouble(3, monto);
+            statement.executeUpdate();
+        }
+    }
+
+    private void cerrarConexion(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.setAutoCommit(true);
+                connection.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

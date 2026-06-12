@@ -7,7 +7,7 @@ import java.sql.SQLException;
 public class ConnectionManager {
 
     private static final String URL =
-            "jdbc:sqlserver://localhost\\MSSQLSERVER01;" +
+            "jdbc:sqlserver://localhost:1433;" +
             "databaseName=CajeroAutomaticoDB;" +
             "encrypt=true;" +
             "trustServerCertificate=true;";
@@ -16,6 +16,12 @@ public class ConnectionManager {
     private static final String PASSWORD = "Cajero12345";
 
     public static Connection getConnection() throws SQLException {
+        try {
+            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        } catch (ClassNotFoundException e) {
+            throw new SQLException("No se encontro el driver JDBC de SQL Server.", e);
+        }
+
         return DriverManager.getConnection(URL, USER, PASSWORD);
     }
 

@@ -1,119 +1,90 @@
 package esfe.presentacion;
 
-import esfe.servicio.CajeroService;
+import esfe.persistencia.CuentaDAO;
 
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Formulario para realizar depósitos de dinero.
- */
 public class DepositoForm extends JFrame {
 
+    private String numeroCuenta;
     private JTextField txtMonto;
-    private CajeroService cajeroService;
 
-    /**
-     * Constructor del formulario DepositoForm.
-     *
-     * @param cajeroService servicio compartido del cajero
-     */
-    public DepositoForm(CajeroService cajeroService) {
-        this.cajeroService = cajeroService;
+    public DepositoForm() {
+        this("1002003001");
+    }
 
-        setTitle("Depositar Dinero");
-        setSize(380, 220);
+    public DepositoForm(String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
+
+        setTitle("Deposito de Dinero");
+        setSize(370, 250);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
 
-        inicializarComponentes();
+        initComponents();
     }
 
-    /**
-     * Inicializa los componentes gráficos para el depósito.
-     */
-    private void inicializarComponentes() {
+    private void initComponents() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+        JLabel lblTitulo = new JLabel("Depositar Dinero", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel panelCentro = new JPanel(new GridLayout(2, 1, 8, 8));
+        panelCentro.add(new JLabel("Monto a depositar:"));
 
-        JLabel lblTitulo = new JLabel("Depósito de Dinero", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
-
-        JLabel lblMonto = new JLabel("Monto:");
         txtMonto = new JTextField();
+        panelCentro.add(txtMonto);
 
+        JPanel panelBotones = new JPanel(new GridLayout(1, 2, 8, 8));
         JButton btnDepositar = new JButton("Depositar");
-        JButton btnCancelar = new JButton("Cancelar");
+        JButton btnCerrar = new JButton("Cerrar");
 
-        btnDepositar.addActionListener(e -> realizarDeposito());
-        btnCancelar.addActionListener(e -> dispose());
+        panelBotones.add(btnDepositar);
+        panelBotones.add(btnCerrar);
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(lblTitulo, gbc);
-
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        panel.add(lblMonto, gbc);
-
-        gbc.gridx = 1;
-        panel.add(txtMonto, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(btnDepositar, gbc);
-
-        gbc.gridx = 1;
-        panel.add(btnCancelar, gbc);
+        panel.add(lblTitulo, BorderLayout.NORTH);
+        panel.add(panelCentro, BorderLayout.CENTER);
+        panel.add(panelBotones, BorderLayout.SOUTH);
 
         add(panel);
+
+        btnDepositar.addActionListener(e -> depositar());
+        btnCerrar.addActionListener(e -> dispose());
     }
 
-    /**
-     * Valida el monto ingresado y realiza el depósito.
-     */
-    private void realizarDeposito() {
+    private void depositar() {
+        String montoTexto = txtMonto.getText().trim();
+
+        if (montoTexto.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese un monto.");
+            return;
+        }
+
+        double monto;
 
         try {
-            double monto = Double.parseDouble(txtMonto.getText());
+            monto = Double.parseDouble(montoTexto);
 
-            // Se envía el monto al servicio para validar y depositar.
-            boolean resultado = cajeroService.depositar(monto);
-
-            if (resultado) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Depósito realizado correctamente.\nNuevo saldo: $ "
-                                + String.format("%.2f", cajeroService.consultarSaldo()),
-                        "Depósito exitoso",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-                dispose();
-
-            } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "El monto debe ser mayor que cero.",
-                        "Monto inválido",
-                        JOptionPane.WARNING_MESSAGE
-                );
+            if (monto <= 0) {
+                JOptionPane.showMessageDialog(this, "El monto debe ser mayor a 0.");
+                return;
             }
 
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un número válido.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Ingrese un monto valido.");
+            return;
+        }
+
+        CuentaDAO cuentaDAO = new CuentaDAO();
+
+        if (cuentaDAO.depositar(numeroCuenta, monto)) {
+            JOptionPane.showMessageDialog(this, "Deposito realizado correctamente.");
+            txtMonto.setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, "No se pudo realizar el deposito.");
         }
     }
 }

@@ -1,61 +1,50 @@
 package esfe.presentacion;
 
-import esfe.servicio.CajeroService;
+import esfe.persistencia.CuentaDAO;
 
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Formulario para consultar el saldo actual de la cuenta.
- */
 public class ConsultaSaldoForm extends JFrame {
 
-    private CajeroService cajeroService;
+    private String numeroCuenta;
 
-    /**
-     * Constructor del formulario ConsultaSaldoForm.
-     *
-     * @param cajeroService servicio compartido del cajero
-     */
-    public ConsultaSaldoForm(CajeroService cajeroService) {
-        this.cajeroService = cajeroService;
-
-        setTitle("Consultar Saldo");
-        setSize(350, 200);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setResizable(false);
-
-        inicializarComponentes();
+    public ConsultaSaldoForm() {
+        this("1002003001");
     }
 
-    /**
-     * Inicializa los componentes gráficos para mostrar el saldo.
-     */
-    private void inicializarComponentes() {
+    public ConsultaSaldoForm(String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(3, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(25, 25, 25, 25));
+        setTitle("Consulta de Saldo");
+        setSize(350, 220);
+        setLocationRelativeTo(null);
+        setResizable(false);
+
+        initComponents();
+    }
+
+    private void initComponents() {
+        CuentaDAO cuentaDAO = new CuentaDAO();
+        double saldo = cuentaDAO.obtenerSaldo(numeroCuenta);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
         JLabel lblTitulo = new JLabel("Saldo Disponible", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
 
-        JLabel lblSaldo = new JLabel(
-                "$ " + String.format("%.2f", cajeroService.consultarSaldo()),
-                SwingConstants.CENTER
-        );
-        lblSaldo.setFont(new Font("Arial", Font.BOLD, 22));
+        JLabel lblSaldo = new JLabel("$" + saldo, SwingConstants.CENTER);
+        lblSaldo.setFont(new Font("Arial", Font.BOLD, 28));
 
         JButton btnCerrar = new JButton("Cerrar");
 
-        // Cierra únicamente esta ventana.
-        btnCerrar.addActionListener(e -> dispose());
-
-        panel.add(lblTitulo);
-        panel.add(lblSaldo);
-        panel.add(btnCerrar);
+        panel.add(lblTitulo, BorderLayout.NORTH);
+        panel.add(lblSaldo, BorderLayout.CENTER);
+        panel.add(btnCerrar, BorderLayout.SOUTH);
 
         add(panel);
+
+        btnCerrar.addActionListener(e -> dispose());
     }
 }

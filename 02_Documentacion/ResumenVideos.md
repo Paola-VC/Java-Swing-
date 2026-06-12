@@ -1,0 +1,7 @@
+Este módulo Front-End de **SecurityApp Swing** representa la construcción de la experiencia visual e interactiva del sistema de seguridad. El objetivo principal es permitir que el usuario pueda iniciar sesión, cambiar su contraseña y administrar usuarios desde una interfaz de escritorio clara, ordenada y funcional.
+
+Durante los videos 8 al 20 se desarrollan las pantallas principales del sistema usando **Java Swing** e **IntelliJ IDEA Swing UI Designer**. Se crean formularios para login, cambio de contraseña, consulta de usuarios, creación, modificación y eliminación de registros. Además, se conecta la interfaz con la lógica del sistema mediante `UserDAO`, permitiendo que las acciones realizadas por el usuario impacten directamente en la base de datos.
+
+Desde el punto de vista del producto, el módulo aporta valor porque permite controlar el acceso al sistema, proteger las credenciales, evitar usuarios inactivos, validar campos obligatorios y mantener una administración básica de usuarios. También se aplican buenas prácticas como separación por capas, uso de ventanas modales, validaciones en la interfaz, tablas no editables, menús organizados y ejecución segura de Swing mediante el EDT.
+
+En conclusión, este módulo convierte la lógica del backend en una aplicación usable para el usuario final, ofreciendo una navegación simple, segura y enfocada en las funciones esenciales de autenticación y mantenimiento de usuarios.

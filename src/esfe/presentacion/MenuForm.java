@@ -1,98 +1,92 @@
 package esfe.presentacion;
 
-import esfe.servicio.CajeroService;
+import esfe.persistencia.UsuarioDAO;
 
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Formulario principal del cajero automático.
- * Desde esta ventana el usuario puede acceder a las operaciones disponibles.
- */
 public class MenuForm extends JFrame {
 
-    private CajeroService cajeroService;
+    private String numeroCuenta;
 
-    /**
-     * Constructor del formulario MenuForm.
-     *
-     * @param cajeroService servicio compartido del cajero
-     */
-    public MenuForm(CajeroService cajeroService) {
-        this.cajeroService = cajeroService;
+    public MenuForm() {
+        this("1002003001");
+    }
 
-        setTitle("Cajero Automático - Menú Principal");
-        setSize(450, 350);
-        setLocationRelativeTo(null);
+    public MenuForm(String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
+
+        setTitle("Menu Principal - Cajero Automatico");
+        setSize(430, 430);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
         setResizable(false);
 
-        inicializarComponentes();
+        initComponents();
     }
 
-    /**
-     * Inicializa los botones y componentes del menú principal.
-     */
-    private void inicializarComponentes() {
+    private void initComponents() {
+        UsuarioDAO usuarioDAO = new UsuarioDAO();
+        String nombreUsuario = usuarioDAO.obtenerNombreUsuario(numeroCuenta);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridLayout(6, 1, 10, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(25, 40, 25, 40));
+        JPanel panelPrincipal = new JPanel(new BorderLayout());
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        JLabel lblBienvenida = new JLabel(
-                "Bienvenido, " + cajeroService.obtenerNombreUsuario(),
+        JLabel lblTitulo = new JLabel("Menu Principal", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 24));
+
+        JLabel lblUsuario = new JLabel(
+                "<html><center>Usuario: " + nombreUsuario + "<br>Cuenta: " + numeroCuenta + "</center></html>",
                 SwingConstants.CENTER
         );
-        lblBienvenida.setFont(new Font("Arial", Font.BOLD, 18));
 
-        JButton btnConsultarSaldo = new JButton("Consultar Saldo");
-        JButton btnDepositar = new JButton("Depositar Dinero");
-        JButton btnRetirar = new JButton("Retirar Dinero");
-        JButton btnCerrarSesion = new JButton("Cerrar Sesión");
+        JPanel panelSuperior = new JPanel(new GridLayout(2, 1));
+        panelSuperior.add(lblTitulo);
+        panelSuperior.add(lblUsuario);
 
-        // Eventos de navegación hacia cada formulario.
-        btnConsultarSaldo.addActionListener(e -> {
-            ConsultaSaldoForm consultaSaldoForm = new ConsultaSaldoForm(cajeroService);
-            consultaSaldoForm.setVisible(true);
+        JPanel panelBotones = new JPanel(new GridLayout(5, 1, 10, 10));
+
+        JButton btnSaldo = new JButton("Consultar saldo");
+        JButton btnDeposito = new JButton("Depositar dinero");
+        JButton btnRetiro = new JButton("Retirar dinero");
+        JButton btnHistorial = new JButton("Historial de transacciones");
+        JButton btnCerrar = new JButton("Cerrar sesion");
+
+        panelBotones.add(btnSaldo);
+        panelBotones.add(btnDeposito);
+        panelBotones.add(btnRetiro);
+        panelBotones.add(btnHistorial);
+        panelBotones.add(btnCerrar);
+
+        panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
+        panelPrincipal.add(panelBotones, BorderLayout.CENTER);
+
+        add(panelPrincipal);
+
+        btnSaldo.addActionListener(e -> {
+            ConsultaSaldoForm form = new ConsultaSaldoForm(numeroCuenta);
+            form.setVisible(true);
         });
 
-        btnDepositar.addActionListener(e -> {
-            DepositoForm depositoForm = new DepositoForm(cajeroService);
-            depositoForm.setVisible(true);
+        btnDeposito.addActionListener(e -> {
+            DepositoForm form = new DepositoForm(numeroCuenta);
+            form.setVisible(true);
         });
 
-        btnRetirar.addActionListener(e -> {
-            RetiroForm retiroForm = new RetiroForm(cajeroService);
-            retiroForm.setVisible(true);
+        btnRetiro.addActionListener(e -> {
+            RetiroForm form = new RetiroForm(numeroCuenta);
+            form.setVisible(true);
         });
 
-        btnCerrarSesion.addActionListener(e -> cerrarSesion());
+        btnHistorial.addActionListener(e -> {
+            HistorialForm form = new HistorialForm(numeroCuenta);
+            form.setVisible(true);
+        });
 
-        panel.add(lblBienvenida);
-        panel.add(btnConsultarSaldo);
-        panel.add(btnDepositar);
-        panel.add(btnRetirar);
-        panel.add(btnCerrarSesion);
-
-        add(panel);
-    }
-
-    /**
-     * Cierra la sesión actual y regresa al formulario de login.
-     */
-    private void cerrarSesion() {
-
-        int opcion = JOptionPane.showConfirmDialog(
-                this,
-                "¿Desea cerrar sesión?",
-                "Confirmar",
-                JOptionPane.YES_NO_OPTION
-        );
-
-        if (opcion == JOptionPane.YES_OPTION) {
+        btnCerrar.addActionListener(e -> {
             LoginForm loginForm = new LoginForm();
             loginForm.setVisible(true);
             dispose();
-        }
+        });
     }
 }

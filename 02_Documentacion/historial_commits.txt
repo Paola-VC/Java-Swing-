@@ -1,0 +1,168 @@
+# 2. historial_commits.txt
+
+txt
+Historial de Commits - CajeroAutomático Swing
+
+Proyecto: CajeroAutomático Swing
+Tecnologías: Java 21, Java Swing, Maven, JDBC, SQL Server, JUnit, Git
+
+------------------------------------------------------------
+Commit 1
+Mensaje: crear proyecto base de cajero automatico
+Descripción:
+Se creó el proyecto inicial en IntelliJ IDEA utilizando Java 21 y Maven. Se verificó que la clase Main ejecutara correctamente.
+
+------------------------------------------------------------
+Commit 2
+Mensaje: organizar estructura inicial del proyecto
+Descripción:
+Se crearon las carpetas principales de documentación, prompts, GitHub, SQL y librerías. También se definió la estructura base para el código fuente.
+
+------------------------------------------------------------
+Commit 3
+Mensaje: agregar paquetes principales del sistema
+Descripción:
+Se crearon los paquetes:
+- esfe.dominio
+- esfe.persistencia
+- esfe.presentacion
+- esfe.utils
+
+Esto permite separar la lógica del cajero automático por capas.
+
+------------------------------------------------------------
+Commit 4
+Mensaje: configurar conexion con SQL Server
+Descripción:
+Se agregó la clase encargada de conectarse a la base de datos mediante JDBC. También se incluyó el driver correspondiente para SQL Server.
+
+------------------------------------------------------------
+Commit 5
+Mensaje: crear script inicial de base de datos
+Descripción:
+Se agregó el script SQL para crear la base de datos del cajero automático y sus tablas principales.
+
+------------------------------------------------------------
+Commit 6
+Mensaje: crear entidades del dominio
+Descripción:
+Se implementaron las clases principales del sistema, como Usuario, Cuenta y Movimiento, para representar la información del cajero automático.
+
+------------------------------------------------------------
+Commit 7
+Mensaje: implementar utilidades del sistema
+Descripción:
+Se agregaron clases auxiliares para manejar validaciones, opciones de ComboBox, tipos de operación y funciones reutilizables.
+
+------------------------------------------------------------
+Commit 8
+Mensaje: implementar dao de usuarios
+Descripción:
+Se creó la clase DAO para consultar y validar usuarios en la base de datos.
+
+------------------------------------------------------------
+Commit 9
+Mensaje: implementar dao de cuentas
+Descripción:
+Se creó la clase DAO para consultar cuentas, saldos y actualizar montos después de una operación.
+
+------------------------------------------------------------
+Commit 10
+Mensaje: implementar dao de movimientos
+Descripción:
+Se creó la clase DAO para registrar retiros, depósitos, transferencias y consultas del historial.
+
+------------------------------------------------------------
+Commit 11
+Mensaje: agregar pruebas de conexion con junit
+Descripción:
+Se implementaron pruebas unitarias para validar que la conexión con SQL Server funcione correctamente.
+
+------------------------------------------------------------
+Commit 12
+Mensaje: agregar pruebas de operaciones del cajero
+Descripción:
+Se probaron operaciones principales como consulta de saldo, retiro, depósito y transferencia.
+
+------------------------------------------------------------
+Commit 13
+Mensaje: crear formularios principales en swing
+Descripción:
+Se creó el paquete de presentación y los formularios principales de la aplicación de escritorio.
+
+------------------------------------------------------------
+Commit 14
+Mensaje: diseñar formulario de inicio de sesion
+Descripción:
+Se diseñó la pantalla de login para que el usuario ingrese su cuenta y PIN.
+
+------------------------------------------------------------
+Commit 15
+Mensaje: codificar inicio de sesion
+Descripción:
+Se implementó la validación del usuario contra la base de datos y el acceso al menú principal.
+
+------------------------------------------------------------
+Commit 16
+Mensaje: diseñar menu principal del cajero
+Descripción:
+Se creó la pantalla principal con las opciones de consultar saldo, retirar, depositar, transferir, ver historial y salir.
+
+------------------------------------------------------------
+Commit 17
+Mensaje: implementar consulta de saldo
+Descripción:
+Se agregó la funcionalidad para mostrar el saldo disponible de la cuenta autenticada.
+
+------------------------------------------------------------
+Commit 18
+Mensaje: implementar retiro de dinero
+Descripción:
+Se programó la operación de retiro, incluyendo validación de monto y saldo suficiente.
+
+------------------------------------------------------------
+Commit 19
+Mensaje: implementar deposito de dinero
+Descripción:
+Se agregó la operación de depósito, actualizando el saldo de la cuenta y registrando el movimiento.
+
+------------------------------------------------------------
+Commit 20
+Mensaje: implementar transferencias entre cuentas
+Descripción:
+Se programó la transferencia de dinero entre cuentas, validando cuenta destino, saldo disponible y registro de movimientos.
+
+------------------------------------------------------------
+Commit 21
+Mensaje: implementar historial de movimientos
+Descripción:
+Se agregó la pantalla para visualizar las transacciones realizadas por el usuario.
+
+------------------------------------------------------------
+Commit 22
+Mensaje: agregar validaciones de formularios
+Descripción:
+Se validaron campos vacíos, montos inválidos, saldos insuficientes y cuentas inexistentes.
+
+------------------------------------------------------------
+Commit 23
+Mensaje: mejorar mensajes del sistema
+Descripción:
+Se agregaron mensajes informativos, advertencias y errores usando JOptionPane.
+
+------------------------------------------------------------
+Commit 24
+Mensaje: agregar documentacion del proyecto
+Descripción:
+Se agregaron archivos de documentación como evidencias, historias de usuario, plan de implementación y resumen técnico.
+
+------------------------------------------------------------
+Commit 25
+Mensaje: version final del cajero automatico
+Descripción:
+Se integraron las funcionalidades principales del proyecto y se realizaron pruebas finales.
+
+------------------------------------------------------------
+Estado final:
+El proyecto CajeroAutomático Swing cuenta con interfaz gráfica, conexión a base de datos, operaciones de cajero, validaciones, pruebas y documentación.
+`

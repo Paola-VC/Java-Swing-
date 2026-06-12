@@ -1,119 +1,90 @@
 package esfe.presentacion;
 
-import esfe.servicio.CajeroService;
+import esfe.persistencia.CuentaDAO;
 
 import javax.swing.*;
 import java.awt.*;
 
-/**
- * Formulario para realizar retiros de dinero.
- */
 public class RetiroForm extends JFrame {
 
+    private String numeroCuenta;
     private JTextField txtMonto;
-    private CajeroService cajeroService;
 
-    /**
-     * Constructor del formulario RetiroForm.
-     *
-     * @param cajeroService servicio compartido del cajero
-     */
-    public RetiroForm(CajeroService cajeroService) {
-        this.cajeroService = cajeroService;
+    public RetiroForm() {
+        this("1002003001");
+    }
 
-        setTitle("Retirar Dinero");
-        setSize(380, 220);
+    public RetiroForm(String numeroCuenta) {
+        this.numeroCuenta = numeroCuenta;
+
+        setTitle("Retiro de Dinero");
+        setSize(370, 250);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
 
-        inicializarComponentes();
+        initComponents();
     }
 
-    /**
-     * Inicializa los componentes gráficos para el retiro.
-     */
-    private void inicializarComponentes() {
+    private void initComponents() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 25, 20, 25));
+        JLabel lblTitulo = new JLabel("Retirar Dinero", SwingConstants.CENTER);
+        lblTitulo.setFont(new Font("Arial", Font.BOLD, 22));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(8, 8, 8, 8);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        JPanel panelCentro = new JPanel(new GridLayout(2, 1, 8, 8));
+        panelCentro.add(new JLabel("Monto a retirar:"));
 
-        JLabel lblTitulo = new JLabel("Retiro de Dinero", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
-
-        JLabel lblMonto = new JLabel("Monto:");
         txtMonto = new JTextField();
+        panelCentro.add(txtMonto);
 
+        JPanel panelBotones = new JPanel(new GridLayout(1, 2, 8, 8));
         JButton btnRetirar = new JButton("Retirar");
-        JButton btnCancelar = new JButton("Cancelar");
+        JButton btnCerrar = new JButton("Cerrar");
 
-        btnRetirar.addActionListener(e -> realizarRetiro());
-        btnCancelar.addActionListener(e -> dispose());
+        panelBotones.add(btnRetirar);
+        panelBotones.add(btnCerrar);
 
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(lblTitulo, gbc);
-
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        panel.add(lblMonto, gbc);
-
-        gbc.gridx = 1;
-        panel.add(txtMonto, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(btnRetirar, gbc);
-
-        gbc.gridx = 1;
-        panel.add(btnCancelar, gbc);
+        panel.add(lblTitulo, BorderLayout.NORTH);
+        panel.add(panelCentro, BorderLayout.CENTER);
+        panel.add(panelBotones, BorderLayout.SOUTH);
 
         add(panel);
+
+        btnRetirar.addActionListener(e -> retirar());
+        btnCerrar.addActionListener(e -> dispose());
     }
 
-    /**
-     * Valida el monto ingresado y realiza el retiro si hay saldo suficiente.
-     */
-    private void realizarRetiro() {
+    private void retirar() {
+        String montoTexto = txtMonto.getText().trim();
+
+        if (montoTexto.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Ingrese un monto.");
+            return;
+        }
+
+        double monto;
 
         try {
-            double monto = Double.parseDouble(txtMonto.getText());
+            monto = Double.parseDouble(montoTexto);
 
-            // Se envía el monto al servicio para validar y retirar.
-            boolean resultado = cajeroService.retirar(monto);
-
-            if (resultado) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Retiro realizado correctamente.\nNuevo saldo: $ "
-                                + String.format("%.2f", cajeroService.consultarSaldo()),
-                        "Retiro exitoso",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-                dispose();
-
-            } else {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "No se pudo realizar el retiro.\nVerifique que el monto sea válido y que tenga saldo suficiente.",
-                        "Retiro no permitido",
-                        JOptionPane.WARNING_MESSAGE
-                );
+            if (monto <= 0) {
+                JOptionPane.showMessageDialog(this, "El monto debe ser mayor a 0.");
+                return;
             }
 
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(
-                    this,
-                    "Debe ingresar un número válido.",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE
-            );
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Ingrese un monto valido.");
+            return;
+        }
+
+        CuentaDAO cuentaDAO = new CuentaDAO();
+
+        if (cuentaDAO.retirar(numeroCuenta, monto)) {
+            JOptionPane.showMessageDialog(this, "Retiro realizado correctamente.");
+            txtMonto.setText("");
+        } else {
+            JOptionPane.showMessageDialog(this, "No se pudo realizar el retiro. Verifique que tenga saldo suficiente.");
         }
     }
 }
